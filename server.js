@@ -6,6 +6,11 @@ const app = express();
 
 const shortenedUrls = {};
 
+const validateUrl = (url) => {
+  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
+  return urlRegex.test(url);
+}
+
 // Basic Configuration
 const port = process.env.PORT || 3001;
 
@@ -25,9 +30,13 @@ app.get('/api/hello', function(req, res) {
 });
 
 app.post('/api/shorturl', function (req, res) {
+  if (!validateUrl(req.body.url)) {
+    res.json({'error': 'invalid url'})
+  } else {
     const shortUrl = shortenedUrls[req.body.url] || Object.keys(shortenedUrls).length + 1;
     shortenedUrls[shortUrl] = req.body.url;
     res.json({ original_url : req.body.url, short_url : shortUrl});
+  }
 });
 
 app.get('/api/shorturl/:short_url', function(req, res) {
